@@ -1,8 +1,10 @@
+<a href="{% url 'get_info:index' %}">Home</a>
+
 {% if matched_users %}
     <h1><b>Matched Users:</b></h1>
     <ul> 
     {% for user in matched_users %}
-        <li><a href="/get_info/{{ user.id }}/"> {{ user.first_name  }} {{ user.last_name }}</a></li>
+        <li><a href="{% url 'get_info:id_lookup' user.id %}"> {{ user.first_name  }} {{ user.last_name }}</a></li>
         {% endfor %}
         </ul>
 {% else %}

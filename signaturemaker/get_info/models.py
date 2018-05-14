@@ -1,5 +1,11 @@
 from django.db import models
 
+
+
+
+# https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python
+
+
 class UserInfo(models.Model):
     def __str__(self):
         return self.first_name + " " + self.last_name

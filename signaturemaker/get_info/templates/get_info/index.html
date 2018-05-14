@@ -1,7 +1,12 @@
+<a href="{% url 'get_info:new_user' %}"> Click here to create a new user </a>
+
+
+<!-- print all users -->
+<p> All Current Users: </p>
 {% if all_users %}
     <ul>
     {% for user in all_users %}
-        <li><a href="/get_info/{{ user.id }}/"> {{ user.first_name  }} {{ user.last_name }}</a></li>
+        <li><a href="{% url 'get_info:id_lookup' user.id %}"> {{ user.first_name  }} {{ user.last_name }}</a></li>
         {% endfor %}
         </ul>
 {% else %}

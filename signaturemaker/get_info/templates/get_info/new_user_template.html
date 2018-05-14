@@ -1,0 +1,12 @@
+<h1>Create a new user!</h1>
+
+{% if error_message %}
+    <p><strong>{{error_message}}</strong></p>
+    
+{% else %}
+    <form action={% url "get_info:new_user" %} method="post">
+    {% csrf_token %}
+        {{ form.as_ul }}
+    <input type="submit" value="OK">
+    </form>
+{% endif %}
