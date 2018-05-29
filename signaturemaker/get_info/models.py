@@ -1,4 +1,9 @@
 from django.db import models
+from django.utils import timezone
+
+from itertools import chain
+from datetime import timedelta
+
 
 
 
@@ -10,7 +15,23 @@ class UserInfo(models.Model):
     def __str__(self):
         return self.first_name + " " + self.last_name
     def was_published_recently(self):
-        return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+        now = timezone.now()
+        return now - timedelta(days=1) <= self.pub_date <= now
+    # return a dictionary of user info
+    def get_user_details(self):    
+        # return a dictionary of user info
+        details = {}
+        for key,value in vars(self).items():
+            new_key = key.title()
+            if type(value) == str:
+                try:
+                    new_key = new_key.replace("_", " ")
+                except:
+                    pass
+                details[new_key] = value
+        return details
+                    
+        
     
     field_len = 50
     
