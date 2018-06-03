@@ -29,7 +29,7 @@ class UserInfo(models.Model):
                 except:
                     pass
                 details[new_key] = value
-        return details
+        return details    
                     
         
     

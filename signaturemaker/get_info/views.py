@@ -1,7 +1,9 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import render
-from datetime import datetime
+from django.shortcuts import render, redirect
 from django.views import generic
+from django.utils import timezone
+
+from datetime import datetime
 
 from get_info.models import UserInfo
 from get_info.forms import NewUserForm
@@ -9,6 +11,8 @@ from signature_maker import info, make_HTML
 from get_info.templatetags.get_info_extras import user_vars
 
 #### Helper Functions ####
+
+
 def find_user(**kwargs):
     print("######################################")
     print(kwargs)
@@ -24,12 +28,12 @@ def find_user(**kwargs):
 def create_new_user(data_object):
     new_user = UserInfo()
     new_user.pub_date = datetime.now()
-    
+    print(data_object)
     [setattr(new_user, key, value) for key,value in data_object.items()]
     new_user.save()
-    return new_user  
+    return new_user
     
-
+    
 #### Views ####
         
 class IndexView(generic.ListView):
@@ -38,7 +42,9 @@ class IndexView(generic.ListView):
     
     def get_queryset(self):
         #Return all users
-        return UserInfo.objects.all()
+        return UserInfo.objects.filter(
+            pub_date__lte=timezone.now()
+            ).order_by('-pub_date')[:5]
     
 
 class DetailView(generic.DetailView):
@@ -52,8 +58,11 @@ class DetailView(generic.DetailView):
         # Add in a QuerySet of all the books
         context['user'] = kwargs['object']
         context['user_details'] = context['user'].get_user_details()
-        print(context['user_details'])
-        return context
+        
+        if kwargs['object'].pub_date > timezone.now():
+            raise Http404("No User Found")
+        else:
+            return context
         
         
 """
@@ -71,29 +80,17 @@ def get_user_info(request, identifier= '',first_name= '', last_name= ''):
     
     return render(request, 'get_info/user_template.html', context)
 """
-
+            
 # Interface to create a new user object to and store in the database
 def new_user_form(request):
-    #@register.simple_tag(user_vars)
     if request.method == 'POST':
-        form = NewUserForm(request.POST)
+        form = NewUserForm(data=request.POST)
         if form.is_valid():
-            matched_users = find_user(first_name= form.cleaned_data["first_name"], last_name = form.cleaned_data["last_name"])
-            if not matched_users:
-                # create_new_user returns the UserInfo object, which has the id, which needs to be a string for the url
-                return HttpResponseRedirect("/get_info/" + str((create_new_user(form.cleaned_data)).id) + "/")
-            else:
-                context = { 'matched_users': matched_users,  }
-                return render(request, 'get_info/user_template.html', context)
-            
-        
+            new_id = create_new_user(form.cleaned_data).id
+            return HttpResponseRedirect("/get_info/" + str(new_id) + "/")
+        else:
+            print("invalid")
+            form = NewUserForm()
     else:
         form = NewUserForm()
     return render(request, 'get_info/new_user_template.html', {'form':form})
-
-
-
-def signature_download():
-    pass
-
-    

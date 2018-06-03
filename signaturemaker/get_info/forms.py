@@ -1,21 +1,44 @@
-from django import forms
+from django.forms import ModelForm
 
-# https://stackoverflow.com/questions/8187082/how-can-you-set-class-attributes-from-variable-arguments-kwargs-in-python
-# Need to create a dictionary that can be imported, with specified allowed keys, so that the forms can be automatically imported 
-# and the forms fields can be generated based on that dictionary
+from get_info.models import UserInfo
 
-class NewUserForm(forms.Form):
-    field_len = 50
+class NewUserForm(ModelForm):
+
+    class Meta:
+        model = UserInfo
+        desired_variables_list = []
+        
+        model_variables = model.__dict__['__doc__']
+        field_variables = model_variables[model_variables.index('(')+1:model_variables.rindex(')')].split(',')
+        field_variables = [field_variable.strip() for field_variable in field_variables]
+        for field_variable in field_variables:
+            if field_variable != "pub_date" and field_variable != "id":
+                desired_variables_list.append(field_variable)   
+
+        fields = desired_variables_list
     
-    first_name    = forms.CharField(max_length= field_len)
-    last_name     = forms.CharField(max_length= field_len)
-    title         = forms.CharField(max_length= field_len)
-    email_address = forms.CharField(max_length= field_len)
-    work_phone    = forms.CharField(max_length= field_len)
-    direct        = forms.CharField(max_length= field_len)
-    department    = forms.CharField(max_length= field_len)
-    # URL to a custom signature image
-    link_address  = forms.CharField(max_length= field_len)
-    # URL that the image should redirect to
-    website_link  = forms.CharField(max_length= field_len)
+    
+        
+"""
+    def __init__(self, *args, **kwargs):
+        super(NewUserForm, self).__init__()
+        field_len = 50
+        try:
+            for field_name in kwargs['model_fields']:
+                print(field_name)
+                if field_name not in NewUserForm.__dict__.keys():
+                    label = field_name.title().replace("_"," ")
+                    #setattr(self,field_name,forms.CharField(max_length= field_len, label= label))
+                    #locals()[field_name]=forms.CharField(max_length= field_len, label= label)
+                    self.fields[field_name]=forms.CharField(max_length= field_len, label= label)
+                   
+        except KeyError:
+            print("KeyError")
+            self = NewUserForm(model_fields=[])
+        
+
+    def get_desired_attr(self):
+        for name,value in self.cleaned_data.items():
+            yield (self.__dict__[name].label, value)
+"""
 

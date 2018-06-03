@@ -9,7 +9,13 @@
 {% else %}
     <form action={% url "get_info:new_user" %} method="post">
     {% csrf_token %}
-        {{ form.as_ul }}
+        {% for field in form %}
+        <div class="fieldWrapper">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            <p class="help">{{ field.help_text|safe }}</p>
+        {% endfor %}
     <input type="submit" value="OK">
     </form>
 {% endif %}
